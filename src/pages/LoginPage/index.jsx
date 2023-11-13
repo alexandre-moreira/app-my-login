@@ -2,7 +2,22 @@ import React from 'react'
 
 const LoginPage = () => {
   return (
-    <div>LoginPage</div>
+    <div id="login">
+        <h1 className="title">Login do sistema</h1>
+        <form className="form">
+            <div className="field">
+                <label htmlFor="email">Email</label>
+                <input type="email" name="email" id="email" />
+            </div>
+            <div className="field">
+                <label htmlFor="passowrd">Senha</label>
+                <input type="passowrd" name="passowrd" id="passowrd" />
+            </div>
+            <div className="actions">
+                <button type="submit">Entrar</button>
+            </div>
+        </form>
+    </div>
   )
 }
 
