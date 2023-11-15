@@ -1,26 +1,42 @@
+import { useState, useContext } from "react";
+
+
 import {
-    BrowserRouter as Router,
-    Route,
-    Routes,
-    Navigate
-} from "react-router-dom"
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate,
+} from "react-router-dom";
 
+import LoginPage from "./pages/LoginPage";
+import HomePage from "./pages/HomePage";
 
-import LoginPage from './pages/LoginPage';
-import HomePage from './pages/HomePage';
+import { AuthContext } from "./contexts/auth";
 
-import React from 'react'
+import React from "react";
 
 const AppRoutes = () => {
+  const [user, setUser] = useState(null);
+
+  const login = (email, password) => {
+    console.log("login auth", { email, password });
+    setUser({id: "123", email});
+  };
+
+  const logout = () => {console.log('Logout!')};
+
   return (
     <Router>
+      <AuthContext.Provider
+        value={{ authenticated: !!user, user, login, logout }}
+      >
         <Routes>
-            < Route exact path="/login" element={<LoginPage />} />
-            < Route exact path="/" element={<HomePage />} />
+          <Route exact path="/login" element={<LoginPage />} />
+          <Route exact path="/" element={<HomePage />} />
         </Routes>
-
+      </AuthContext.Provider>
     </Router>
-  )
-}
+  );
+};
 
-export default AppRoutes
+export default AppRoutes;
