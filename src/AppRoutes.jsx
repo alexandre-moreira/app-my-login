@@ -1,6 +1,4 @@
-import { useState, useContext } from "react";
-
-
+import React, {useContext} from "react";
 import {
   BrowserRouter as Router,
   Route,
@@ -11,30 +9,28 @@ import {
 import LoginPage from "./pages/LoginPage";
 import HomePage from "./pages/HomePage";
 
-import { AuthContext } from "./contexts/auth";
-
-import React from "react";
+import { AuthProvider, AuthContext} from "./contexts/auth";
+// import {Children} from 'react/cjs/react.production.min';
 
 const AppRoutes = () => {
-  const [user, setUser] = useState(null);
+  const Private = ({children}) => {
+    const {authenticated} = useContext(AuthContext);
 
-  const login = (email, password) => {
-    console.log("login auth", { email, password });
-    setUser({id: "123", email});
-  };
+    if(!authenticated) {
+      return <Navigate to="/login" />
+    }
 
-  const logout = () => {console.log('Logout!')};
+    return children;
 
+  }
   return (
     <Router>
-      <AuthContext.Provider
-        value={{ authenticated: !!user, user, login, logout }}
-      >
+      <AuthProvider>
         <Routes>
           <Route exact path="/login" element={<LoginPage />} />
-          <Route exact path="/" element={<HomePage />} />
+          <Route exact path="/" element={<Private><HomePage /></Private>} />
         </Routes>
-      </AuthContext.Provider>
+      </AuthProvider>
     </Router>
   );
 };
