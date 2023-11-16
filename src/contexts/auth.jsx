@@ -1,52 +1,64 @@
-import React, { useState, useEffect, createContext} from "react";
+import React, { useState, useEffect, createContext } from "react";
 
 import { useNavigate } from "react-router-dom";
 
+import { api, createSession } from "../services/api";
+
 export const AuthContext = createContext();
 
-export const AuthProvider = ({children}) => {
-    const navigate = useNavigate();
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
+export const AuthProvider = ({ children }) => {
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const recoveredUser = localStorage.getItem("user");
+  useEffect(() => {
+    const recoveredUser = localStorage.getItem("user");
+    const token = localStorage.getItem("token");
 
-        if(recoveredUser){
-            setUser(JSON.parse(recoveredUser));
-        }
+    if (recoveredUser && token) {
+      setUser(JSON.parse(recoveredUser));
+      api.defaults.headers.Authorization = `Baarer ${token}`;
+    }
 
-        setLoading(false);
-    },[]);
+    setLoading(false);
+  }, []);
 
-    const login = (email, password) => {
-        console.log("login auth", { email, password });
+  const login = async (email, password) => {
+    console.log("login auth", { email, password });
 
-        const loggedUser= {
-            id: "123",
-            email,
-        }
+    const response = await createSession(email, password);
 
-        localStorage.setItem("user", JSON.stringify(loggedUser));
+    console.log("login", response.data);
 
-        if(password === "secret"){
-            setUser(loggedUser);
-            navigate("/")
-        }
-    };
+    const loggedUser = response.data.user;
+    const token = response.data.token;
 
-    const logout = () => {
-        console.log('Logout!');
-        localStorage.removeItem("user")
-        setUser(null);
-        navigate("/login")
-    };
+    api.defaults.headers.Authorization = `Baarer ${token}`;
 
-        return (
-            <AuthContext.Provider
-            value={{ authenticated: !!user, user,loading, login, logout }}
-        >
-            {children}
-        </AuthContext.Provider>
-        )
-}
+    localStorage.setItem("user", JSON.stringify(loggedUser));
+    localStorage.setItem("token", token);
+
+    setUser(loggedUser);
+    navigate("/");
+  };
+
+  const logout = () => {
+    console.log("Logout!");
+
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+
+    api.defaults.headers.Authorization = null;
+
+    setUser(null);
+    navigate("/login");
+  };
+
+  return (
+    <AuthContext.Provider
+      value={{ authenticated: !!user, user, loading, login, logout }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+};
